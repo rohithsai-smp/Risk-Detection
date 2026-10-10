@@ -56,7 +56,8 @@ if ($LASTEXITCODE -eq 0) {
     Write-Host "  SUCCESS! Project successfully uploaded to:" -ForegroundColor Green
     Write-Host "  https://github.com/rohithsai-smp/digital-risk-shield" -ForegroundColor Cyan
     Write-Host "======================================================================" -ForegroundColor Green
-} else {
+}
+else {
     Write-Host ""
     Write-Host "If prompted, please complete the GitHub sign-in prompt to authorize the upload." -ForegroundColor Yellow
 }
