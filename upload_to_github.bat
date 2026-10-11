@@ -26,7 +26,7 @@ if %ERRORLEVEL% neq 0 (
 )
 
 echo [OK] Git is detected!
-set REPO_URL=https://github.com/rohithsai-smp/digital-risk-shield.git
+set REPO_URL=https://github.com/rohithsai-smp/Risk-Detection.git
 
 echo.
 echo Step 1: Initializing Git repository...
@@ -36,7 +36,7 @@ echo Step 2: Staging all project files...
 git add .
 
 echo Step 3: Committing files...
-git commit -m "Initial commit: Digital Risk Shield platform"
+git commit -m "Update project: Deployment configs, requirements.txt, and live backend link support"
 
 echo Step 4: Setting branch to main...
 git branch -M main
@@ -52,7 +52,7 @@ if %ERRORLEVEL% equ 0 (
     echo.
     echo ======================================================================
     echo   SUCCESS! Your project is now live on GitHub:
-    echo   https://github.com/rohithsai-smp/digital-risk-shield
+    echo   https://github.com/rohithsai-smp/Risk-Detection
     echo ======================================================================
 ) else (
     echo.

@@ -3,6 +3,21 @@
  * Full SPA controller, API integration, and reactive rendering
  */
 
+// Global API Base URL Resolution & Interceptor:
+// Transparently routes /api/* requests to a custom remote or deployed backend link if configured.
+(function() {
+  const originalFetch = window.fetch;
+  window.fetch = function(input, init) {
+    if (typeof input === 'string' && input.startsWith('/api/')) {
+      const base = window.API_BASE_URL || localStorage.getItem('drs_api_base_url') || '';
+      if (base) {
+        input = base.replace(/\/+$/, '') + input;
+      }
+    }
+    return originalFetch.call(this, input, init);
+  };
+})();
+
 const App = {
   currentView: 'landing', // 'landing' or dashboard views: 'overview', 'brands', 'social', 'apps', 'analyzer', 'threats', 'reports', 'architecture', 'settings', 'help'
   selectedBrand: 'All Brands',
@@ -16,10 +31,82 @@ const App = {
   async init() {
     console.log("Initializing Digital Risk Shield...");
     this.bindEvents();
+    this.initBackendSettings();
     await this.loadInitialData();
     this.checkSession();
     this.navigate(this.currentView);
     if (window.lucide) lucide.createIcons();
+  },
+
+  initBackendSettings() {
+    const saved = localStorage.getItem('drs_api_base_url');
+    if (saved) {
+      window.API_BASE_URL = saved;
+    }
+    const input = document.getElementById('custom-backend-url-input');
+    if (input) {
+      input.value = saved || '';
+    }
+    this.updateBackendStatusBadge();
+  },
+
+  getBackendUrl() {
+    return window.API_BASE_URL || localStorage.getItem('drs_api_base_url') || (window.location.origin !== 'null' && window.location.origin !== 'file://' ? window.location.origin : 'http://localhost:8000');
+  },
+
+  async saveBackendUrlFromInput() {
+    const input = document.getElementById('custom-backend-url-input');
+    if (!input) return;
+    const val = input.value.trim();
+    if (!val) {
+      localStorage.removeItem('drs_api_base_url');
+      delete window.API_BASE_URL;
+      UI.showToast('Backend link reset to default origin.', 'info');
+    } else {
+      const clean = val.replace(/\/+$/, '');
+      localStorage.setItem('drs_api_base_url', clean);
+      window.API_BASE_URL = clean;
+      UI.showToast(`Backend link updated to ${clean}`, 'success');
+    }
+    await this.loadInitialData();
+    this.updateBackendStatusBadge();
+  },
+
+  async testBackendConnectionFromInput() {
+    const input = document.getElementById('custom-backend-url-input');
+    const targetUrl = (input && input.value.trim()) ? input.value.trim().replace(/\/+$/, '') : this.getBackendUrl();
+    try {
+      UI.showToast('Pinging backend /api/health...', 'info');
+      const res = await fetch(`${targetUrl}/api/health`, { method: 'GET' });
+      if (res.ok) {
+        const data = await res.json();
+        UI.showToast(`Connected successfully! Server: ${data.service || 'Digital Risk Shield'} (${data.version || '1.0.0'})`, 'success');
+        this.updateBackendStatusBadge();
+      } else {
+        UI.showToast(`Server responded with HTTP status ${res.status}`, 'warning');
+      }
+    } catch (e) {
+      UI.showToast(`Connection failed: Could not reach ${targetUrl}. Ensure CORS allows access and the server is running.`, 'error');
+    }
+  },
+
+  async updateBackendStatusBadge() {
+    const badge = document.getElementById('backend-status-badge');
+    const textEl = document.getElementById('backend-status-text');
+    if (!badge) return;
+    try {
+      const res = await fetch('/api/health');
+      if (res.ok) {
+        badge.className = 'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30';
+        if (textEl) textEl.textContent = 'Backend Online';
+      } else {
+        badge.className = 'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/30';
+        if (textEl) textEl.textContent = 'Backend Degraded';
+      }
+    } catch (e) {
+      badge.className = 'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-rose-500/10 text-rose-400 border border-rose-500/30';
+      if (textEl) textEl.textContent = 'Backend Offline';
+    }
   },
 
   checkSession() {
@@ -1013,7 +1100,9 @@ const App = {
   },
 
   exportReport(format) {
-    window.location.href = `/api/reports/export?format=${format}`;
+    const base = window.API_BASE_URL || localStorage.getItem('drs_api_base_url') || '';
+    const prefix = base ? base.replace(/\/+$/, '') : '';
+    window.location.href = `${prefix}/api/reports/export?format=${format}`;
     UI.showToast(`Generating ${format.toUpperCase()} export...`, 'info');
   },
 

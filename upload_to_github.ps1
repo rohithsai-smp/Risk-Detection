@@ -28,7 +28,7 @@ if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
 }
 
 Write-Host "[OK] Git is detected!" -ForegroundColor Green
-$repoUrl = "https://github.com/rohithsai-smp/digital-risk-shield.git"
+$repoUrl = "https://github.com/rohithsai-smp/Risk-Detection.git"
 
 Write-Host ""
 Write-Host "Step 1: Initializing Git repository..." -ForegroundColor Yellow
@@ -38,7 +38,7 @@ Write-Host "Step 2: Staging all files..." -ForegroundColor Yellow
 git add .
 
 Write-Host "Step 3: Committing files..." -ForegroundColor Yellow
-git commit -m "Initial commit: Digital Risk Shield platform"
+git commit -m "Update project: Deployment configs, requirements.txt, and live backend link support"
 
 Write-Host "Step 4: Setting branch to main..." -ForegroundColor Yellow
 git branch -M main
@@ -54,7 +54,7 @@ if ($LASTEXITCODE -eq 0) {
     Write-Host ""
     Write-Host "======================================================================" -ForegroundColor Green
     Write-Host "  SUCCESS! Project successfully uploaded to:" -ForegroundColor Green
-    Write-Host "  https://github.com/rohithsai-smp/digital-risk-shield" -ForegroundColor Cyan
+    Write-Host "  https://github.com/rohithsai-smp/Risk-Detection" -ForegroundColor Cyan
     Write-Host "======================================================================" -ForegroundColor Green
 }
 else {
