@@ -1,0 +1,17 @@
+{
+  "version": 2,
+  "rewrites": [
+    {
+      "source": "/api/:match*",
+      "destination": "https://YOUR-BACKEND.onrender.com/api/:match*"
+    },
+    {
+      "source": "/docs",
+      "destination": "https://YOUR-BACKEND.onrender.com/docs"
+    },
+    {
+      "source": "/openapi.json",
+      "destination": "https://YOUR-BACKEND.onrender.com/openapi.json"
+    }
+  ]
+}
